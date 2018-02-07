@@ -2,9 +2,22 @@
 # Based on information from:
 # https://www.kernel.org/doc/Documentation/input/joystick-api.txt
 
+# Import required modules
 import os, struct, array
 from fcntl import ioctl
 import time
+import RPi.GPIO as GPIO
+
+speed=5
+
+# Declare the GPIO settings
+GPIO.setmode(GPIO.BOARD)
+
+# set up GPIO pins
+GPIO.setup(7, GPIO.OUT) # Connected to PWMA
+pwm = GPIO.PWM(7, 100)   # Initialize PWM on pwmPin 100Hz frequency
+GPIO.setup(11, GPIO.OUT) # Connected to AIN2
+GPIO.setup(12, GPIO.OUT) # Connected to AIN1
 
 # Iterate over the joystick devices.
 print('Available devices:')
@@ -149,12 +162,43 @@ while True:
                 button_states[button] = value
                 if value:
                     print ("%s pressed" % (button))
+                    if button == 'x':
+                        # Drive the motor clockwise
+                        GPIO.output(12, GPIO.HIGH) # Set AIN1
+                        GPIO.output(11, GPIO.LOW) # Set AIN2
+                        print ("Left")
+                    elif button == 'a':
+                        GPIO.output(12, GPIO.LOW) # Set AIN1
+                        GPIO.output(11, GPIO.LOW) # Set AIN2
+                        GPIO.output(7, GPIO.LOW) # Set PWMA
+                        print ("Back")
+                    elif button == 'b':
+                        # Drive the motor counterclockwise
+                        GPIO.output(12, GPIO.LOW) # Set AIN1
+                        GPIO.output(11, GPIO.HIGH) # Set AIN2
+                        print ("Right")
+                    elif button == 'y':
+                        print ("Forward")
+                    elif button == 'tr':
+                        print ("Faster")
+                        speed += 5
+                        if speed > 100:
+                           speed = 100
+                        print (speed)
+                    elif button == 'tl':
+                        print ("Slower")
+                        speed -= 5
+                        if speed < 5:
+                            speed = 5
+                        print (speed)
                 else:
                     print ("%s released" % (button))
-
+        
         if type & 0x02:
             axis = axis_map[number]
             if axis:
                 fvalue = value / 32767.0
                 axis_states[axis] = fvalue
                 print ("%s: %.3f" % (axis, fvalue))
+    # output the pwm speed
+        pwm.start(speed)
