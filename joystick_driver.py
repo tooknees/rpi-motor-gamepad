@@ -24,7 +24,10 @@ print('Available devices:')
 
 for fn in os.listdir('/dev/input'):
     if fn.startswith('js'):
+        joystick ='/dev/input/' + (fn)
+        print (joystick)
         print('  /dev/input/%s' % (fn))
+        
 
 # We'll store the states here.
 axis_states = {}
@@ -108,7 +111,7 @@ button_map = []
 # Open the joystick device.
 fn = '/dev/input/js0'
 print('Opening %s...' % fn)
-jsdev = open(fn, 'rb')
+jsdev = open(joystick, 'rb')
 
 # Get the device name.
 #buf = bytearray(63)
@@ -162,30 +165,30 @@ while True:
                 button_states[button] = value
                 if value:
                     print ("%s pressed" % (button))
-                    if button == 'x':
+                    if button == 'x' or button == 'trigger':
                         # Drive the motor clockwise
                         GPIO.output(12, GPIO.HIGH) # Set AIN1
                         GPIO.output(11, GPIO.LOW) # Set AIN2
                         print ("Left")
-                    elif button == 'a':
+                    elif button == 'a' or button == 'thumb':
                         GPIO.output(12, GPIO.LOW) # Set AIN1
                         GPIO.output(11, GPIO.LOW) # Set AIN2
                         GPIO.output(7, GPIO.LOW) # Set PWMA
                         print ("Back")
-                    elif button == 'b':
+                    elif button == 'b' or button == 'thumb2':
                         # Drive the motor counterclockwise
                         GPIO.output(12, GPIO.LOW) # Set AIN1
                         GPIO.output(11, GPIO.HIGH) # Set AIN2
                         print ("Right")
-                    elif button == 'y':
+                    elif button == 'y' or button == 'top':
                         print ("Forward")
-                    elif button == 'tr':
+                    elif button == 'tr' or button == 'pinkie':
                         print ("Faster")
                         speed += 5
                         if speed > 100:
                            speed = 100
                         print (speed)
-                    elif button == 'tl':
+                    elif button == 'tl' or button == 'top2':
                         print ("Slower")
                         speed -= 5
                         if speed < 5:
@@ -223,3 +226,4 @@ while True:
                         print (speed)
     # output the pwm speed
         pwm.start(speed)
+GPIO.cleanup()
