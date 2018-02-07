@@ -200,5 +200,26 @@ while True:
                 fvalue = value / 32767.0
                 axis_states[axis] = fvalue
                 print ("%s: %.3f" % (axis, fvalue))
+                if axis == 'x':
+                    if fvalue < -0.05:
+                        print ("Left")
+                         # Drive the motor clockwise
+                        GPIO.output(12, GPIO.HIGH) # Set AIN1
+                        GPIO.output(11, GPIO.LOW) # Set AIN2
+                        speed = fvalue*-100
+                        print (speed)
+                    elif fvalue > 0.05:
+                        print ("Right")
+                         # Drive the motor counterclockwise
+                        GPIO.output(12, GPIO.LOW) # Set AIN1
+                        GPIO.output(11, GPIO.HIGH) # Set AIN2
+                        speed = fvalue*100
+                        print (speed)
+                    else:
+                        GPIO.output(12, GPIO.LOW) # Set AIN1
+                        GPIO.output(11, GPIO.LOW) # Set AIN2
+                        GPIO.output(7, GPIO.LOW) # Set PWMA
+                        speed = 0
+                        print (speed)
     # output the pwm speed
         pwm.start(speed)
