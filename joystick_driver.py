@@ -149,81 +149,109 @@ for btn in buf[:num_buttons]:
 
 print ('%d axes found: %s'% (num_axes, ', '.join(axis_map))) 
 print ('%d buttons found: %s' % (num_buttons, ', '.join(button_map)))
+try:  
+    # Main event loop
+    while True:
+        evbuf = jsdev.read(8)
+        if evbuf:
+            time, value, type, number = struct.unpack('IhBB', evbuf)
 
-# Main event loop
-while True:
-    evbuf = jsdev.read(8)
-    if evbuf:
-        time, value, type, number = struct.unpack('IhBB', evbuf)
+            if type & 0x80:
+                 print ("(initial)", end=' ')
 
-        if type & 0x80:
-             print ("(initial)", end=' ')
-
-        if type & 0x01:
-            button = button_map[number]
-            if button:
-                button_states[button] = value
-                if value:
-                    print ("%s pressed" % (button))
-                    if button == 'x' or button == 'trigger':
-                        # Drive the motor clockwise
-                        GPIO.output(12, GPIO.HIGH) # Set AIN1
-                        GPIO.output(11, GPIO.LOW) # Set AIN2
-                        print ("Left")
-                    elif button == 'a' or button == 'thumb':
-                        GPIO.output(12, GPIO.LOW) # Set AIN1
-                        GPIO.output(11, GPIO.LOW) # Set AIN2
-                        GPIO.output(7, GPIO.LOW) # Set PWMA
-                        print ("Back")
-                    elif button == 'b' or button == 'thumb2':
-                        # Drive the motor counterclockwise
-                        GPIO.output(12, GPIO.LOW) # Set AIN1
-                        GPIO.output(11, GPIO.HIGH) # Set AIN2
-                        print ("Right")
-                    elif button == 'y' or button == 'top':
-                        print ("Forward")
-                    elif button == 'tr' or button == 'pinkie':
-                        print ("Faster")
-                        speed += 5
-                        if speed > 100:
-                           speed = 100
-                        print (speed)
-                    elif button == 'tl' or button == 'top2':
-                        print ("Slower")
-                        speed -= 5
-                        if speed < 5:
-                            speed = 5
-                        print (speed)
-                else:
-                    print ("%s released" % (button))
-        
-        if type & 0x02:
-            axis = axis_map[number]
-            if axis:
-                fvalue = value / 32767.0
-                axis_states[axis] = fvalue
-                print ("%s: %.3f" % (axis, fvalue))
-                if axis == 'x':
-                    if fvalue < -0.05:
-                        print ("Left")
-                         # Drive the motor clockwise
-                        GPIO.output(12, GPIO.HIGH) # Set AIN1
-                        GPIO.output(11, GPIO.LOW) # Set AIN2
-                        speed = fvalue*-100
-                        print (speed)
-                    elif fvalue > 0.05:
-                        print ("Right")
-                         # Drive the motor counterclockwise
-                        GPIO.output(12, GPIO.LOW) # Set AIN1
-                        GPIO.output(11, GPIO.HIGH) # Set AIN2
-                        speed = fvalue*100
-                        print (speed)
+            if type & 0x01:
+                button = button_map[number]
+                if button:
+                    button_states[button] = value
+                    if value:
+                        print ("%s pressed" % (button))
+                        if button == 'x' or button == 'trigger':
+                            # Drive the motor clockwise
+                            GPIO.output(12, GPIO.HIGH) # Set AIN1
+                            GPIO.output(11, GPIO.LOW) # Set AIN2
+                            print ("Left")
+                        elif button == 'a' or button == 'thumb':
+                            GPIO.output(12, GPIO.LOW) # Set AIN1
+                            GPIO.output(11, GPIO.LOW) # Set AIN2
+                            GPIO.output(7, GPIO.LOW) # Set PWMA
+                            print ("Back")
+                        elif button == 'b' or button == 'thumb2':
+                            # Drive the motor counterclockwise
+                            GPIO.output(12, GPIO.LOW) # Set AIN1
+                            GPIO.output(11, GPIO.HIGH) # Set AIN2
+                            print ("Right")
+                        elif button == 'y' or button == 'top':
+                            print ("Forward")
+                        elif button == 'tr' or button == 'pinkie':
+                            print ("Faster")
+                            speed += 5
+                            if speed > 100:
+                               speed = 100
+                            print (speed)
+                        elif button == 'tl' or button == 'top2':
+                            print ("Slower")
+                            speed -= 5
+                            if speed < 5:
+                                speed = 5
+                            print (speed)
                     else:
-                        GPIO.output(12, GPIO.LOW) # Set AIN1
-                        GPIO.output(11, GPIO.LOW) # Set AIN2
-                        GPIO.output(7, GPIO.LOW) # Set PWMA
-                        speed = 0
-                        print (speed)
-    # output the pwm speed
-        pwm.start(speed)
-GPIO.cleanup()
+                        print ("%s released" % (button))
+            
+            if type & 0x02:
+                axis = axis_map[number]
+                if axis:
+                    fvalue = value / 32767.0
+                    axis_states[axis] = fvalue
+                    print ("%s: %.3f" % (axis, fvalue))
+                    if axis == 'x':
+                        if fvalue < -0.05:
+                            print ("Left")
+                             # Drive the motor clockwise
+                            GPIO.output(12, GPIO.HIGH) # Set AIN1
+                            GPIO.output(11, GPIO.LOW) # Set AIN2
+                            speed = fvalue*-100
+                            print (speed)
+                        elif fvalue > 0.05:
+                            print ("Right")
+                             # Drive the motor counterclockwise
+                            GPIO.output(12, GPIO.LOW) # Set AIN1
+                            GPIO.output(11, GPIO.HIGH) # Set AIN2
+                            speed = fvalue*100
+                            print (speed)
+                        else:
+                            GPIO.output(12, GPIO.LOW) # Set AIN1
+                            GPIO.output(11, GPIO.LOW) # Set AIN2
+                            GPIO.output(7, GPIO.LOW) # Set PWMA
+                            speed = 0
+                            print (speed)
+                    if axis == 'y':
+                        if fvalue < -0.05:
+                            print ("Left")
+                             # Drive the motor clockwise
+                            GPIO.output(12, GPIO.HIGH) # Set AIN1
+                            GPIO.output(11, GPIO.LOW) # Set AIN2
+                            speed = fvalue*-100
+                            print (speed)
+                        elif fvalue > 0.05:
+                            print ("Right")
+                             # Drive the motor counterclockwise
+                            GPIO.output(12, GPIO.LOW) # Set AIN1
+                            GPIO.output(11, GPIO.HIGH) # Set AIN2
+                            speed = fvalue*100
+                            print (speed)
+                        else:
+                            GPIO.output(12, GPIO.LOW) # Set AIN1
+                            GPIO.output(11, GPIO.LOW) # Set AIN2
+                            GPIO.output(7, GPIO.LOW) # Set PWMA
+                            speed = 0
+                            print (speed)
+        # output the pwm speed
+            pwm.start(speed)
+except:  
+    # this catches ALL other exceptions including errors.  
+    # You won't get any error messages for debugging  
+    # so only use it once your code is working  
+    print ("Error or exception occurred!")  
+  
+finally:  
+    GPIO.cleanup() # this ensures a clean exit  
