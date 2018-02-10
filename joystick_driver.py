@@ -247,7 +247,7 @@ try:
         # output the pwm speed
             pwm.start(speed)
 except:  
-    # this catches ALL other exceptions including errors.  
+    # this catches ALL exceptions including errors.  
     # You won't get any error messages for debugging  
     # so only use it once your code is working  
     print ("Error or exception occurred!")  
