@@ -6,6 +6,31 @@ import os, struct, array
 from fcntl import ioctl
 import time
 import RPi.GPIO as GPIO
+import I2C_LCD_driver
+
+mylcd = I2C_LCD_driver.lcd()
+
+rightarrow = [      
+        [0b00000,
+	0b00100,
+	0b00110,
+	0b11111,
+	0b00110,
+	0b00100,
+	0b00000,
+	0b00000],
+]
+
+leftarrow = [      
+        [0b00000,
+	0b00100,
+	0b01100,
+	0b11111,
+	0b01100,
+	0b00100,
+	0b00000,
+	0b00000],
+]
 
 speed=5
 
@@ -210,6 +235,10 @@ try:
                             GPIO.output(11, GPIO.LOW) # Set AIN2
                             speed = fvalue*-100
                             print (speed)
+                            mylcd.lcd_load_custom_chars(leftarrow)
+                            mylcd.lcd_write(0x80)
+                            mylcd.lcd_display_string("Direction ", 1)
+                            mylcd.lcd_write_char(0)
                         elif fvalue > 0.05:
                             print ("Right")
                              # Drive the motor counterclockwise
@@ -217,6 +246,10 @@ try:
                             GPIO.output(11, GPIO.HIGH) # Set AIN2
                             speed = fvalue*100
                             print (speed)
+                            mylcd.lcd_load_custom_chars(rightarrow)
+                            mylcd.lcd_write(0x80)
+                            mylcd.lcd_display_string("Direction ", 1)
+                            mylcd.lcd_write_char(0)
                         else:
                             GPIO.output(12, GPIO.LOW) # Set AIN1
                             GPIO.output(11, GPIO.LOW) # Set AIN2
